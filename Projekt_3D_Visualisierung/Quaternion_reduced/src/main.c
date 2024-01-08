@@ -12,22 +12,22 @@
 static const struct device *i2c_dev = DEVICE_DT_GET(I2C_NODE);
 
 //* BNO055 Address A (Pin17 LOW) **/
-#define BNO055_ADDRESS_A (0x28)
+#define BNO055_ADDRESS_A        (0x28)
 
 /*Operationsmodus*/
-#define OPERATION_MODE_CONFIG	(0x00)
-#define OPERATION_MODE_NDOF		(0x0C)
+#define OPERATION_MODE_CONFIG   (0x00)
+#define OPERATION_MODE_NDOF     (0x0C)
 
 /*Registeraddressen*/
-#define BNO055_CHIP_ID_ADDR						(0x00)
-#define BNO055_PAGE_ID_ADDR						(0x07)
-#define BNO055_QUATERNION_DATA_W_LSB_ADDR		(0x20)
-#define BNO055_CALIB_STAT_ADDR					(0x35)
-#define BNO055_OPR_MODE_ADDR					(0x3D)
-#define BNO055_SYS_TRIGGER_ADDR					(0x3F)
+#define BNO055_CHIP_ID_ADDR                     (0x00)
+#define BNO055_PAGE_ID_ADDR                     (0x07)
+#define BNO055_QUATERNION_DATA_W_LSB_ADDR       (0x20)
+#define BNO055_CALIB_STAT_ADDR                  (0x35)
+#define BNO055_OPR_MODE_ADDR                    (0x3D)
+#define BNO055_SYS_TRIGGER_ADDR                 (0x3F)
 
-#define READ_SENSOR_INTERVALL		20
-#define ERROR_SLEEP					5000
+#define READ_SENSOR_INTERVALL       20
+#define ERROR_SLEEP                 5000
 
 /* LEDS for Calibration*/
 #define LED0_NODE	DT_NODELABEL(led0)
@@ -176,6 +176,7 @@ static void send_quaternionreg_run(void *o) {
 
     otInstance *myInstance;
     myInstance = openthread_get_default_instance();
+    if (myInstance == NULL){printk("myInstance is NULL\n");}
     otUdpSocket mySocket;
 
     otMessageInfo messageInfo;
@@ -192,6 +193,13 @@ static void send_quaternionreg_run(void *o) {
             break;
         }
         otMessage *msg = otUdpNewMessage(myInstance, NULL);
+        if (msg == NULL)
+        {
+            k_msleep(100);
+            error = otUdpClose(myInstance, &mySocket);
+            printk("msg is NULL. udp closed\n");
+            break;
+        }
         error = otMessageAppend(msg, buffer, (uint16_t)strlen(buffer));
         if (error != OT_ERROR_NONE)
         {
